@@ -1,0 +1,19 @@
+Richard He (rh455), Stephen Kim (shk77), Mark Ren (mr775)
+
+INFO 3300 Status Report 3
+
+So far:
+
+Mark: Parsed data from .pdf into .csv. Used Richard’s functions to make a prototype visualization on d3.
+
+Richard: Created HTML skeleton and JS to import data and sort departments and courses into objects/arrays.
+
+Stephen: Attempted to create prototype visualization, encountered problems with importing data.
+
+Before the next progress report:
+
+Mark: Debug bar not appearing, make bar width correspond with overall class sizes.
+
+Stephen: Consult with TA about what more could be done.
+
+Richard: Write-up.

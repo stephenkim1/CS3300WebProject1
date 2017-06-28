@@ -1,0 +1,36 @@
+INFO 3300 Project 1 Write-up
+Richard He, Stephen Kim, Mark Ren
+
+The data set used was Cornell University's Median Grade Report for the spring 2010 semester. The data set consists of 1077 classes, each of which is an observation with 5 variables: department, class number, title, class size, and median letter grade. The original data set was divided into two sections, single department courses and cross-listed courses, and was stored in pdf format.
+
+Multiple preprocessing steps were required to produce the visualizations in this project. First, Mark Ren wrote a parser to extract all of the single department courses and format them as a .csv file. Next, Richard He hand copied the remaining cross-listed courses into the .csv file. Cross-listed courses were recorded only once in the department listed as the parent of the course. A few typos in the original data set were resolved without issue. The course titles were discarded as we did not plan to include this variable in our visualization.
+
+The .csv file was imported into javascript where it was converted into an array of objects. Further processing in Javascript included converting median letter grades into median GPAs, changing the type of values to either string or number as appropriate, and binning departments into 6 broad categories: science & math, technology & engineering, humanities, social sciences, multi-disciplinary, and career.
+
+The bins were defined as following.
+Departments from the College of Engineering and departments we felt fell under the umbrella of technology were binned as "Engineering".
+Departments listed on Wikipedia as a social science were binned as "Social Sciences".
+Departments listed on Wikipedia as humanities disciplines were binned as "Humanities".
+Departments that fell purely under of biology, chemistry, physics, and math were binned as "BIO/CHEM/PHYS/MATH".
+Departments outside of the College of Engineering that did not fit into the above categories but were based on sciences were binned as "Applied Sci.".
+Departments in the School of Industrial and Labor Relations were binned as "ILR".
+All other departments were binned as "Other", including AEM, HADM, military science, and architecture departments.
+
+After binning, the array of objects was rearranged to be doubly nested, first by binned category, then by department.
+
+In our submitted visualization, we tried to show two main aspects of the data using a normalized stacked bar chart: the distribution of median grades within a category, and the number of students within each category. Each median grade/category pairing maps to a differently colored rectangle. The proportion of classes within a category with each median letter grade is mapped to the height of the rectangle. The number of students taking classes within a category maps to the width of the category. The median letter grade is mapped to a color where redder values represent lower median grades and greener values represent higher median grades. We note that the y-label is confusing, but it indicates what the data we have truly represents: the sum of classes weighted by class size with a given median grade (i.e. the number of students in a class with a given median grade).
+
+As can be easily visualized, the category of Biology, Chemistry, Physics, and Math (which as a side note makes up the "Science GPA" considered most heavily by medical schools), is most skewed toward lower grades, with a greater proportion of students receiving grades in the B and C range than any other category. Surprisingly to us, the Hotel School is second in proportion of grades B+ and lower, with the fewest proportion of A/A+'s. The humanities gave out by far the most A range grades.
+
+
+
+
+
+
+
+
+
+
+
+
+In another visualization, we focused on the technology and engineering category to show how class number, class size, and median grades are related. Individual courses are represented as translucent colored circles. The class' department maps to its y-coordinate, and the class number maps to its x-coordinate.  The number of students in each class is mapped to the radius of each circle using a square root scale in order to achieve the effect where the area of the circle is proportional to the number of students in each class. As before, the median letter grade is mapped to a color where redder values represent lower median grades and greener values represent higher median grades. However, editing the submitted chart messed up this one, and we already decided to submit the first. The remnants are available by uncommenting the two single lines that create "svg1" and call "showVis2".

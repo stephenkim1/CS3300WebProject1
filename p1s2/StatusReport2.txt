@@ -1,0 +1,13 @@
+Richard He (rh455), Stephen Kim (shk77), Mark Ren (mr775)
+
+INFO 3300 Status Report 2
+
+So far, each of us has come up with at least 2 ideas for the project that we can create with accessible datasets.
+
+Before the next progress report:
+
+Mark: Manually parse the .pdf dataset into .csv with header: Dept, Number, Size, Median Grade
+
+Richard: Create JS parse file function to turn .csv into usable data
+
+Stephen: Create skeleton graph

@@ -1,0 +1,299 @@
+<html>
+
+<head>
+	<title>Project 1: Static Data Visualization</title>
+
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+
+	<style>
+		body {
+			font-family: 'Alegreya Sans', Calibri, sans-serif;
+		}
+
+		svg {
+			border: solid #ccc 1px;
+		}
+	</style>
+</head>
+
+<body>
+	<h3>Cornell 2010 Median Grade Visualization</h3>
+
+	<div>
+		<p>By Richard He, Stephen Kim, and Mark Ren</p>
+	</div>
+
+	<div id="plot">
+		<!--<svg id="svg1" width="600" height = "600"></svg>-->
+		<svg id="svg2" width="600" height="600"></svg>
+	</div>
+
+	<script id="notes">
+		//Define variables outside callback function
+		var rawData, depData;
+
+		//Convert letter grades to GPA
+		var letterToGPA = d3.scaleOrdinal().domain(["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-"]).range([4.3, 4.0, 3.7, 3.3, 3.0, 2.7, 2.3, 2.0, 1.7, 1.3, 1.0, 0.7]);
+
+		//Bin departments into categories
+		var appSci = ["ALS", "ANSC", "ASTRO", "BTRY", "EAS", "ENTOM", "FDSC", "HORT", "NS", "PLBR", "PLPA", "STSCI", "NTRES", "DEA", "BSOC", "STS"];
+
+		var bcpm = ["BIOAP", "BIOBM", "BIOEE", "BIOG", "BIOGD", "BIOMI", "BIOMS", "BIONB", "BIOPL", "CHEM", "MATH", "PHYS"]
+
+		var techEng = ["AEP", "BEE", "BME", "CEE", "CHEME", "CIS", "CS", "CSS", "ECE", "ENGRC", "ENGRD", "ENGRG", "ENGRI", "FSAD", "INFO", "MAE", "MSE", "NSE", "ORIE", "TAM"];
+
+		var socSci = ["ANTHR", "ARKEO", "DSOC", "ECON", "EDUC", "FGSS", "GOVT", "HIST", "HD", "LING", "PSYCH", "SOC", "PAM"];
+
+		var human = ["AAS", "AIS", "AMST", "ART", "ARTH", "ASIAN", "ASRC", "CAPS", "CHIN", "CLASS", "COML", "COMM", "ENGL", "ENGLF", "FILM", "FREN", "GERST", "HINDI", "ITAL", "JAPAN", "KOREA", "LATIN", "MEDVL", "MUSIC", "NES", "PHIL", "PORT", "ROMS",
+			"RUSSA", "SHUM", "SPAN", "SWED", "THETR", "VISST"
+		];
+
+		var ilr = ["ILRCB", "ILRHR", "ILRIC", "ILRLE", "ILROB", "ILRST"];
+
+		var other = ["AIRS", "MILS", "NAVS", "ARCH", "CRP", "LA", "HE", "COLLS", "AEM", "NBA"];
+
+		var hotel = ["HADM"];
+
+		var categories = ["bcpm", "hotel", "techEng", "socSci", "appSci", "ilr", "human", "other"];
+
+		var selectedDepartments = ["BIOBM", "BIOEE", "BIOG", "BIOGD", "BIOMI", "BIONB", "BIOPL", "CHEM", "CHEME", "CIS", "CS", "MAE", "AEP", "CEE", "CHEME", "CLASS", "COML", "COMM", "ENGL", "STS", "PAM", "NTRES", "DEA", "ILRCB", "ILRHR", "ILRIC", "ILRLE",
+			"ILROB", "ILRST", "ECON", "PSYCH", "SOC"
+		];
+
+		//Format the values as the appropriate strings and numbers
+		function parseline(line) {
+			var lineCat;
+
+			if (appSci.indexOf(line.Department) !== -1) {
+				lineCat = "appSci";
+			} else if (bcpm.indexOf(line.Department) !== -1) {
+				lineCat = "bcpm";
+			} else if (techEng.indexOf(line.Department) !== -1) {
+				lineCat = "techEng";
+			} else if (socSci.indexOf(line.Department) !== -1) {
+				lineCat = "socSci";
+			} else if (human.indexOf(line.Department) !== -1) {
+				lineCat = "human";
+			} else if (ilr.indexOf(line.Department) !== -1) {
+				lineCat = "ilr";
+			} else if (hotel.indexOf(line.Department) !== -1) {
+				lineCat = "hotel";
+			} else if (other.indexOf(line.Department) !== -1) {
+				lineCat = "other";
+			} else {
+				lineCat = "ERROR";
+			}
+
+			return {
+				department: "" + line.Department,
+				number: +line.Number,
+				size: +line.Size,
+				medLetter: "" + line.Grade,
+				medGPA: +letterToGPA(line.Grade),
+				category: lineCat
+			};
+		}
+
+		d3.csv("../Median_Grades.csv", parseline, function(error, data) {
+			if (error) {
+				d3.csv("../project1/Median_Grades.csv", parseline, function(e, data) {
+					rawData = data;
+
+					catData = d3.nest()
+						.key(function(d) {
+							return d.category;
+						})
+						.key(function(d) {
+							return d.department;
+						})
+						.entries(rawData);
+
+					//showVis1(catData);
+					showVis2(catData);
+				});
+				return;
+			}
+			rawData = data;
+
+			catData = d3.nest()
+				.key(function(d) {
+					return d.category;
+				})
+				.key(function(d) {
+					return d.department;
+				})
+				.entries(rawData);
+
+			//showVis1(catData);
+			showVis2(catData);
+		});
+
+		function showVis1(data) {
+			var svg = d3.select("#svg1");
+
+			var numberScale = d3.scaleLinear().domain([500, 5000]).range([50, 500]);
+			var catScale = d3.scaleLinear().domain([0, 6]).range([20, 500]);
+			var gradeScale = d3.scaleLinear().domain([2, 3.7, 4.3]).range(["#ff0000", "#cccc00", "#00bb00"]);
+			var sizeScale = d3.scaleSqrt().domain([1, 1500]).range([5, 50]);
+
+			var xAxis = d3.axisTop(numberScale).ticks(5);
+			var yAxis = d3.axisLeft(catScale).ticks(5).tickFormat(function(d, i) {
+				return categories[d - 1];
+			});
+			svg.append("g").attr("transform", "translate(0, 20)").call(xAxis);
+			svg.append("g").attr("transform", "translate(50, 0)").call(yAxis);
+
+			var currentCat;
+
+			data.forEach(function(cat) {
+				currentCat = cat.key;
+				cat.values.forEach(function(dept) {
+					if (selectedDepartments.indexOf(dept.key) != -1) {
+						dept.values.forEach(function(course) {
+							svg.append("circle")
+								.attr("cx", numberScale(course.number))
+								.attr("cy", catScale(categories.indexOf(currentCat) + 1))
+								.attr("r", sizeScale(course.size))
+								.style("opacity", 0.3)
+								.style("fill", gradeScale(course.medGPA));
+						});
+					}
+				});
+			});
+
+		}
+
+		var catSizes, tValues;
+
+		function showVis2(data) {
+			var svg = d3.select("#svg2");
+
+			var spaceBetweenBars = 1;
+			var grades = {
+				0: ["A+"],
+				1: ["A"],
+				2: ["A-"],
+				3: ["B+"],
+				4: ["B"],
+				5: ["B-"],
+				6: ["C+"],
+				7: ["C"]
+			};
+
+			catSizes = {
+				"bcpm": 0,
+				"appSci": 0,
+				"techEng": 0,
+				"socSci": 0,
+				"human": 0,
+				"ilr": 0,
+				"hotel": 0,
+				"other": 0
+			};
+			data.forEach(function(cat) { // find sums of category sizes
+				for (var i = 0; i < cat.values.length; i++) {
+					for (var j = 0; j < cat.values[i].values.length; j++) {
+						catSizes[cat.values[i].values[j].category] += cat.values[i].values[j].size;
+					}
+				}
+			});
+			var partialSumCatSizes = {
+				"bcpm": catSizes["bcpm"]
+			};
+			for (var i = 1; i < categories.length; i++) { // partial sum catSizes
+				partialSumCatSizes[categories[i]] = catSizes[categories[i]] + partialSumCatSizes[categories[i - 1]];
+			}
+
+			var labels = {
+				"bcpm": "BIO/CHEM/MATH/PHYS",
+				"hotel": "Hotel",
+				"techEng": "Engineering",
+				"socSci": "Social Sciences",
+				"appSci": "Applied Sci.",
+				"ilr": "ILR",
+				"human": "Humanities",
+				"other": "Other"
+			};
+
+			var sizeScale = d3.scaleLinear().domain([1, 0]).range([100, 500]);
+			var catScale = d3.scaleLinear().domain([0, 56500]).range([75, 500]);
+			var gradeScale = d3.scaleOrdinal().domain([2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0, 4.3]).range(["#a80000", "#ff0000", "#f47600", "#f4a700", "#f4c300", "#dbef40", "#a6d800", "#00bb00"]);
+			var widthScale = d3.scaleLinear().domain([0, 15000]).range([0, 50]);
+
+			var yAxis = d3.axisLeft(sizeScale).tickValues([0, 0.25, 0.5, 0.75, 1]).tickFormat(d3.format(".0%"));
+			var xAxis = d3.axisBottom(catScale).tickValues([]);
+			svg.append("g").attr("transform", "translate(0, 500)").call(xAxis);
+			svg.append("g").attr("transform", "translate(75, 0)").call(yAxis);
+			svg.append("text")
+				.text("Students in Classes with Median Grade (% total)")
+				.attr("transform", "rotate(-90)translate(-450, 25)");
+			svg.append("text")
+				.text("bar width indicates relative enrollment by category")
+				.attr("transform", "translate(500, 540)")
+				.style("font-size", 8)
+				.style("text-anchor", "end");
+
+
+			data.forEach(function(cat) {
+				var gradeCount = {
+					"C": 0,
+					"C+": 0,
+					"B-": 0,
+					"B": 0,
+					"B+": 0,
+					"A-": 0,
+					"A": 0,
+					"A+": 0
+				};
+				for (var i = 0; i < cat.values.length; i++) {
+					for (var j = 0; j < cat.values[i].values.length; j++) {
+						gradeCount[cat.values[i].values[j].medLetter] += cat.values[i].values[j].size;
+					}
+				}
+				var sum = 0; // sum of sizes (total # people) within category
+				for (var k in gradeCount) {
+					sum += gradeCount[k];
+				}
+
+				var partialSum = 0; // partial sum of sizes within category
+				for (var k in gradeCount) {
+					if (gradeCount[k] > 0 && sum > 0) {
+						svg.append("rect")
+							.attr("x", catScale(partialSumCatSizes[cat.key]) - catScale(sum) + 76)
+							.attr("y", sizeScale((partialSum + gradeCount[k]) / sum))
+							.attr("width", (catScale(sum) - 76) - spaceBetweenBars)
+							.attr("height", function getBarHeight() {
+								return gradeCount[k] / sum * (sizeScale.range()[1] - sizeScale.range()[0]);
+							})
+							.style("fill", gradeScale(letterToGPA(k)));
+						partialSum += gradeCount[k];
+					}
+				}
+				svg.append("text")
+					.text(labels[cat.key])
+					.attr("x", catScale(partialSumCatSizes[cat.key]) - (catScale(sum) - 75) / 2)
+					.attr("y", 515)
+					.attr("font-size", 9)
+					.attr("text-anchor", "middle");
+			});
+
+			for (var i in grades) {
+				svg.append("rect")
+					.attr("x", 525)
+					.attr("y", i * 13.5 + 100)
+					.attr("width", 10)
+					.attr("height", 10)
+					.style("fill", gradeScale(letterToGPA(i)));
+
+				svg.append("text")
+					.attr("x", 540)
+					.attr("y", i * 14 + 108)
+					.style("font-size", 14)
+					.style("fill", gradeScale(letterToGPA(i)))
+					.text(grades[i]);
+			}
+		}
+	</script>
+</body>
+
+</html>
